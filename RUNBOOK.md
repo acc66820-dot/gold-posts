@@ -1,6 +1,6 @@
 # Daily gold post — runbook (Instagram @ahmedoraibi, 8:00 AM Bahrain)
 
-**Schedule:** Mon–Thu = live price at 8:00 AM. Saturday = Friday's closing price at 8:00 AM (valid Sat + Sun). **No post on Friday or Sunday** — if today (Asia/Bahrain) is Friday or Sunday, stop immediately without posting or notifying.
+**Schedule:** Mon–Fri = live price at 8:00 AM. Saturday = Friday's closing price at 8:00 AM (valid Sat + Sun). **No post on Sunday** — if today (Asia/Bahrain) is Sunday, stop immediately without posting or notifying.
 
 Run this end to end, unattended. Timezone: Asia/Bahrain (UTC+3). Metricool brand blogId: `7116567`.
 Golden rule: **never publish a price that isn't verified live.** If any check fails, do not schedule a post — notify the user instead (SendUserMessage, and PushNotification if available) with the reason.
