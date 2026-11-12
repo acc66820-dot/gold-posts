@@ -59,7 +59,7 @@ def build_html(a, d, closing):
     date_ar = f"{DAYS[d.weekday()]} {d.day} {MONTHS[d.month-1]} {d.year}"
     k = {kk: val for kk, _, val in v["karats"]}
     ch = lambda kk: v["g_change"] * kk / 24
-    tag = "سعر الإقفال" if closing else "4:00 م"
+    tag = "إغلاق الجمعة" if closing else "8:00 ص"
 
     def card(kk, sub):
         return f"""<div class="kc"><div class="kh"><span class="kb">{kk}K</span><span class="kn">عيار {kk}</span></div>
@@ -105,6 +105,7 @@ h1 em{{font-style:normal;color:var(--gold)}}
 .mc{{flex:1;background:var(--card);border:1.5px solid var(--line);border-radius:28px;padding:24px 28px}}
 .mt{{font-size:22px;color:var(--muted);font-weight:500}}
 .mv{{font-family:'Rubik';font-weight:700;font-size:44px;margin-top:10px;direction:ltr;text-align:right}}
+.note.closed{{color:var(--ink);font-weight:600;background:#EFE3BF;border:1.5px solid #D9C48E;border-radius:20px;padding:12px 20px;margin-bottom:14px;margin-top:16px}}
 .note{{margin-top:auto;font-size:21px;color:var(--muted);text-align:center;padding-bottom:16px}}
 .foot{{display:flex;justify-content:space-between;align-items:center;border-top:1.5px solid #D6CDB5;padding:22px 0 44px}}
 .handle{{font-family:'Mono';font-size:28px;color:#4a4a48;direction:ltr}}
@@ -114,7 +115,7 @@ h1 em{{font-style:normal;color:var(--gold)}}
   <div class="brand"><svg width="30" height="34" viewBox="0 0 30 34"><rect x="3" y="10" width="7" height="14" fill="#C99A2E"/><rect x="6" y="4" width="1.6" height="26" fill="#C99A2E"/><rect x="18" y="8" width="7" height="12" fill="none" stroke="#1C1F26" stroke-width="2"/><rect x="20.7" y="3" width="1.6" height="26" fill="#1C1F26"/></svg>أحمد العريبي</div>
   <div class="pill">XAU/USD <i></i></div>
 </div>
-<h1>سعر <em>الذهب</em> اليوم</h1>
+<h1>{"إغلاق <em>الذهب</em>" if closing else "سعر <em>الذهب</em> اليوم"}</h1>
 <div class="date">{date_ar}<span class="time">{tag}</span></div>
 
 <div class="hero">
@@ -143,17 +144,17 @@ h1 em{{font-style:normal;color:var(--gold)}}
     <div class="hl"><span class="hb">21K</span><div><div class="hn">غرام عيار 21</div><div class="hs">الأكثر طلباً في البحرين · دينار بحريني</div></div></div>
   </div>
   <div class="hv"><b>{k[21]:.3f}</b></div>
-  <div class="hc {cls}">{arrow} {word} {abs(ch(21)):.3f} د.ب عن أمس</div>
+  <div class="hc {cls}">{arrow} {word} {abs(ch(21)):.3f} د.ب {"عن الخميس" if closing else "عن أمس"}</div>
 </div>
 
 <div class="row">{card(24,'')}{card(22,'')}{card(18,'')}</div>
 
 <div class="row">
   <div class="mc"><div class="mt">الأونصة بالدولار</div><div class="mv">${a.price:,.2f}</div></div>
-  <div class="mc"><div class="mt">التغير اليومي</div><div class="mv {cls}">{'+' if up else '−'}{abs(v['pct']):.2f}%</div></div>
+  <div class="mc"><div class="mt">{"تغير يوم الجمعة" if closing else "التغير اليومي"}</div><div class="mv {cls}">{'+' if up else '−'}{abs(v['pct']):.2f}%</div></div>
 </div>
 
-<div class="note">سعر الغرام الخام حسب السعر العالمي المباشر · بدون المصنعية</div>
+<div class="note{" closed" if closing else ""}">{"🔒 السوق العالمي مغلق · هذا سعر إغلاق الجمعة وثابت يومي السبت والأحد · بدون المصنعية" if closing else "سعر الغرام الخام حسب السعر العالمي المباشر · بدون المصنعية"}</div>
 <div class="foot"><div class="src">المصدر: السعر الفوري العالمي · 1$ = 0.376 د.ب</div><div class="handle">@ahmedoraibi</div></div>
 </div></body></html>"""
 
@@ -162,13 +163,14 @@ def caption(a, d, closing):
     v = d_vals
     date_ar = f"{DAYS[d.weekday()]} {d.day} {MONTHS[d.month-1]} {d.year}"
     trend = "📈 ارتفاع" if a.change >= 0 else "📉 انخفاض"
-    head = "سعر إقفال الذهب" if closing else "سعر الذهب اليوم"
+    head = "سعر إغلاق الذهب" if closing else "سعر الذهب اليوم"
     lines = [f"✨ {head} في البحرين | {date_ar}", "",
              f"⭐ عيار 21: {v['karats'][2][2]:.3f} د.ب",
              f"🥇 عيار 24: {v['karats'][0][2]:.3f} د.ب",
              f"🥇 عيار 22: {v['karats'][1][2]:.3f} د.ب",
              f"🥇 عيار 18: {v['karats'][3][2]:.3f} د.ب", "",
              f"🌍 الأونصة: ${a.price:,.2f} ({trend} {abs(v['pct']):.2f}%)", "",
+             *(["🔒 السوق العالمي مغلق بالويكند، فهذا سعر إغلاق يوم الجمعة ويبقى نفسه السبت والأحد. نرجع لكم بالسعر المباشر يوم الإثنين 8 الصبح.", ""] if closing else []),
              "ℹ️ الأسعار للغرام الخام حسب السعر العالمي المباشر، ولا تشمل المصنعية.", "",
              "#سعر_الذهب #الذهب #البحرين #اسعار_الذهب_اليوم #ذهب #XAUUSD #gold #bahrain"]
     return "\n".join(lines)

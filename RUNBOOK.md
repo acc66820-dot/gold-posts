@@ -1,4 +1,6 @@
-# Daily gold post — runbook (Instagram @ahmedoraibi, 4:00 PM Bahrain)
+# Daily gold post — runbook (Instagram @ahmedoraibi, 8:00 AM Bahrain)
+
+**Schedule:** Mon–Thu = live price at 8:00 AM. Saturday = Friday's closing price at 8:00 AM (valid Sat + Sun). **No post on Friday or Sunday** — if today (Asia/Bahrain) is Friday or Sunday, stop immediately without posting or notifying.
 
 Run this end to end, unattended. Timezone: Asia/Bahrain (UTC+3). Metricool brand blogId: `7116567`.
 Golden rule: **never publish a price that isn't verified live.** If any check fails, do not schedule a post — notify the user instead (SendUserMessage, and PushNotification if available) with the reason.
@@ -7,9 +9,9 @@ Golden rule: **never publish a price that isn't verified live.** If any check fa
 - Repo is cloned at the working dir (`git clone --depth 1 https://github.com/acc66820-dot/gold-posts`).
 - Check `python3 -c "import playwright"` and `/usr/bin/google-chrome`. If playwright is missing: `pip install --break-system-packages playwright && python3 -m playwright install chromium`.
 
-## 2. Wait until 15:55 Bahrain time
-- `TZ=Asia/Bahrain date` — if earlier than 15:55, sleep until 15:55:00 (Bash with a long timeout).
-- If it's already later than 16:10, do NOT post. Notify the user that the run started too late.
+## 2. Wait until 07:55 Bahrain time
+- `TZ=Asia/Bahrain date` — if earlier than 07:55, sleep until 07:55:00 (Bash with a long timeout).
+- If it's already later than 08:10, do NOT post. Notify the user that the run started too late.
 
 ## 3. Get the live price (within 5 minutes of fetching)
 Always add a cache-buster so WebFetch doesn't serve a cached copy: `?nocache=<unix epoch seconds>`.
@@ -21,11 +23,11 @@ Always add a cache-buster so WebFetch doesn't serve a cached copy: `?nocache=<un
 - Do NOT use investing.com (it has shown undated, stale prices).
 
 Accept the price only if ALL hold:
-1. Kitco's stamp is today and no more than 5 minutes old (15:55 Bahrain = 07:55 New York in winter / 08:55 in summer, so compare carefully using UTC).
+1. Kitco's stamp is today and no more than 5 minutes old (07:55 Bahrain = 04:55 UTC = 23:55 New York the previous day in winter / 00:55 in summer — compare carefully in UTC).
 2. A second source (BullionVault, else Trading Economics) is from today and within **0.3%** of Kitco.
 If a check fails, wait 60 seconds and re-fetch (new epoch), up to 3 tries. Still failing → no post, notify the user.
 
-**Weekend (Sat/Sun):** the market is closed. Kitco shows Friday's close; accept it if its stamp is the last Friday close and a second source agrees within 0.3%. Render with `--closing` (post says "سعر الإقفال").
+**Saturday:** the market is closed. Kitco shows Friday's close (stamp ≈ Friday 17:00 New York); the 5-minute rule does not apply, but the stamp must be that Friday close and a second source must agree within 0.3%. Use Friday's day change. Render with `--closing` (the post says it's Friday's closing price and stays the same Saturday and Sunday).
 
 ## 4. Render
 ```
@@ -42,16 +44,16 @@ git add posts/<date>.png posts/<date>.txt && git commit -m "Gold post <date>" &&
 Confirm with `curl -sI <url>` that it returns 200 (may take ~30s after push).
 
 ## 6. Schedule on Metricool
-Call `createScheduledPost` with blogId `7116567`, date `<date>T16:00:00+03:00` and info:
+Call `createScheduledPost` with blogId `7116567`, date `<date>T08:00:00+03:00` and info:
 ```json
 {"autoPublish": true, "draft": false, "text": "<contents of posts/<date>.txt>",
  "media": ["<raw URL>"], "providers": [{"network": "instagram"}],
- "publicationDate": {"dateTime": "<date>T16:00:00", "timezone": "Asia/Bahrain"},
+ "publicationDate": {"dateTime": "<date>T08:00:00", "timezone": "Asia/Bahrain"},
  "instagramData": {"type": "POST"}, "firstCommentText": "", "shortener": false,
  "smartLinkData": {"ids": []}, "descendants": [], "hasNotReadNotes": false, "mediaAltText": []}
 ```
-If it's already 15:59 or later, use now + 2 minutes instead of 16:00.
+If it's already 07:59 or later, use now + 2 minutes instead of 08:00.
 Then confirm with `getScheduledPosts` that the post is there.
 
 ## 7. Report
-Send the user one short message: 21K price, ounce price, and that it's scheduled for 4:00 PM (or why it was skipped).
+Send the user one short message: 21K price, ounce price, and that it's scheduled for 8:00 AM (or why it was skipped).
