@@ -59,7 +59,7 @@ def build_html(a, d, closing):
     date_ar = f"{DAYS[d.weekday()]} {d.day} {MONTHS[d.month-1]} {d.year}"
     k = {kk: val for kk, _, val in v["karats"]}
     ch = lambda kk: v["g_change"] * kk / 24
-    tag = "إغلاق الجمعة" if closing else "8:00 ص"
+    tag = "إغلاق الجمعة" if closing else a.time
 
     def card(kk, sub):
         return f"""<div class="kc"><div class="kh"><span class="kb">{kk}K</span><span class="kn">عيار {kk}</span></div>
@@ -200,6 +200,7 @@ if __name__ == "__main__":
     ap.add_argument("--date", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--closing", action="store_true")
+    ap.add_argument("--time", default="8:00 ص")
     a = ap.parse_args()
     d = datetime.date.fromisoformat(a.date)
     d_vals = compute(a.price, a.change, a.low, a.high)
