@@ -10,7 +10,9 @@ Prices are USD per troy ounce (spot). Output: 1080x1350 PNG + caption .txt next 
 import argparse, datetime, pathlib, asyncio
 
 OZ_G = 31.1034768
-USD_BHD = 0.376  # fixed peg
+USD_BHD = 0.38  # exchange rate used for posts (1 USD = 0.38 BHD)
+# gram factor per karat: BHD/gram = USD/oz price x factor x USD_BHD
+FACTORS = {24: 0.0321, 22: 0.0294, 21: 0.028, 18: 0.024}
 KARATS = [(24, "الأعلى نقاءً · سبائك"), (22, "مشغولات خليجية"), (21, "الأكثر تداولاً"), (18, "مجوهرات")]
 DAYS = ["الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"]
 MONTHS = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس",
@@ -19,14 +21,14 @@ HERE = pathlib.Path(__file__).resolve().parent
 
 
 def compute(price, change, low, high):
-    g24 = price / OZ_G * USD_BHD
+    g24 = price * FACTORS[24] * USD_BHD
     prev = price - change
     return {
         "g24": g24,
-        "karats": [(k, label, g24 * k / 24) for k, label in KARATS],
+        "karats": [(k, label, price * FACTORS[k] * USD_BHD) for k, label in KARATS],
         "oz_bhd": price * USD_BHD,
         "pct": change / prev * 100 if prev else 0,
-        "g_change": change / OZ_G * USD_BHD,
+        "g_change": change,  # USD/oz; per-karat gram change = change x FACTORS[k] x USD_BHD
         "bar10": g24 * 10,
         "pos": 0 if high == low else max(0, min(1, (price - low) / (high - low))),
     }
@@ -58,7 +60,7 @@ def build_html(a, d, closing):
     word = "ارتفاع" if up else "انخفاض"
     date_ar = f"{DAYS[d.weekday()]} {d.day} {MONTHS[d.month-1]} {d.year}"
     k = {kk: val for kk, _, val in v["karats"]}
-    ch = lambda kk: v["g_change"] * kk / 24
+    ch = lambda kk: v["g_change"] * FACTORS[kk] * USD_BHD
     tag = "إغلاق الجمعة" if closing else a.time
 
     def card(kk, sub):
@@ -155,7 +157,7 @@ h1 em{{font-style:normal;color:var(--gold)}}
 </div>
 
 <div class="note{" closed" if closing else ""}">{"🔒 السوق العالمي مغلق · هذا سعر إغلاق الجمعة وثابت يومي السبت والأحد · بدون المصنعية" if closing else "سعر الغرام الخام حسب السعر العالمي المباشر · بدون المصنعية"}</div>
-<div class="foot"><div class="src">المصدر: السعر الفوري العالمي · 1$ = 0.376 د.ب</div><div class="handle">@ahmedoraibi</div></div>
+<div class="foot"><div class="src">المصدر: السعر الفوري العالمي · 1$ = 0.38 د.ب</div><div class="handle">@ahmedoraibi</div></div>
 </div></body></html>"""
 
 

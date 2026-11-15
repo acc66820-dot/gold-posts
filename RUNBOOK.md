@@ -33,7 +33,7 @@ If a check fails, wait 60 seconds and re-fetch (new epoch), up to 3 tries. Still
 ```
 python3 generate.py --price <bid> --change <day change $> --low <low> --high <high> --date <YYYY-MM-DD Bahrain> --out posts/<YYYY-MM-DD>.png [--closing]
 ```
-This writes the PNG and `posts/<date>.txt` (the caption). Open the PNG with Read and check it visually: numbers present, nothing overlapping, 21K is the hero. Sanity check: 21K gram BHD = price / 31.1035 × 0.376 × 21/24.
+This writes the PNG and `posts/<date>.txt` (the caption). Open the PNG with Read and check it visually: numbers present, nothing overlapping, 21K is the hero. Sanity check (BHD/gram = USD/oz price × factor × 0.38): 24K ×0.0321, 22K ×0.0294, 21K ×0.028, 18K ×0.024.
 
 ## 5. Publish the image
 ```
