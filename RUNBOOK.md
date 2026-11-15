@@ -6,7 +6,7 @@ Run this end to end, unattended. Timezone: Asia/Bahrain (UTC+3). Metricool brand
 Golden rule: **never publish a price that isn't verified live.** If any check fails, do not schedule a post — notify the user instead (SendUserMessage, and PushNotification if available) with the reason.
 
 ## 1. Setup
-- Repo is cloned at the working dir (`git clone --depth 1 https://github.com/acc66820-dot/gold-posts`).
+- Make sure the code is the LATEST from GitHub: if `gold-posts/` already exists, run `git fetch origin main && git checkout -B main origin/main && git reset --hard origin/main` (a fresh `git clone` fails on an existing folder and leaves stale code). Then confirm `generate.py` has `USD_BHD = 0.38` and `FACTORS = {24: 0.0321, 22: 0.0294, 21: 0.028, 18: 0.024}` — if not, do not post; notify the user.
 - Check `python3 -c "import playwright"` and `/usr/bin/google-chrome`. If playwright is missing: `pip install --break-system-packages playwright && python3 -m playwright install chromium`.
 
 ## 2. Wait until 07:55 Bahrain time
