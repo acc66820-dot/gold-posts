@@ -18,16 +18,13 @@ Always add a cache-buster so WebFetch doesn't serve a cached copy: `?nocache=<un
 
 - **Primary — Kitco:** `https://www.kitco.com/charts/gold?nocache=<epoch>`
   Extract: bid price per ounce (USD), day's change ($), low, high, and the page date/time stamp (New York time).
-- **Check — BullionVault:** `https://www.bullionvault.com/gold-price-chart.do?nocache=<epoch>` (spot USD/oz with GMT timestamp).
-- **Tie-breaker — Trading Economics:** `https://tradingeconomics.com/commodity/gold?nocache=<epoch>`
+- **Kitco is the only source** (user's decision, 16 Nov 2026). No second-source check.
 - Do NOT use investing.com (it has shown undated, stale prices).
 
-Accept the price only if ALL hold:
-1. Kitco's stamp is today and no more than 5 minutes old (07:55 Bahrain = 04:55 UTC = 23:55 New York the previous day in winter / 00:55 in summer — compare carefully in UTC).
-2. A second source (BullionVault, else Trading Economics) is from today and within **0.3%** of Kitco.
+Accept the price only if Kitco's stamp is today and no more than 5 minutes old (07:55 Bahrain = 04:55 UTC = 23:55 New York the previous day in winter / 00:55 in summer — compare carefully in UTC), and bid, change, low and high are all present and consistent (low ≤ bid ≤ high).
 If a check fails, wait 60 seconds and re-fetch (new epoch), up to 3 tries. Still failing → no post, notify the user.
 
-**Saturday:** the market is closed. Kitco shows Friday's close (stamp ≈ Friday 17:00 New York); the 5-minute rule does not apply, but the stamp must be that Friday close and a second source must agree within 0.3%. Use Friday's day change. Render with `--closing` (the post says it's Friday's closing price and stays the same Saturday and Sunday).
+**Saturday:** the market is closed. Kitco shows Friday's close (stamp ≈ Friday 17:00 New York); the 5-minute rule does not apply, but the stamp must be that Friday close. Use Friday's day change. Render with `--closing` (the post says it's Friday's closing price and stays the same Saturday and Sunday).
 
 ## 4. Render
 ```
