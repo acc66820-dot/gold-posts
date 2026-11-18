@@ -14,15 +14,15 @@ Golden rule: **never publish a price that isn't verified live.** If any check fa
 - If it's already later than 08:10, do NOT post. Notify the user that the run started too late.
 
 ## 3. Get the live price (within 5 minutes of fetching)
-Always add a cache-buster so WebFetch doesn't serve a cached copy: `?nocache=<unix epoch seconds>`.
+Use ONLY these exact URLs, written out in full (a URL that isn't written verbatim in the task prompt triggers a permission prompt that nobody answers in an unattended run — that's why runs on 18 Nov failed). Try 1 → `https://www.kitco.com/charts/gold?nocache=1`, try 2 → `https://www.kitco.com/charts/gold?nocache=2`, try 3 → `https://www.kitco.com/charts/gold?nocache=3`. Never build a URL with the epoch or any other value.
 
-- **Primary — Kitco:** `https://www.kitco.com/charts/gold?nocache=<epoch>`
+- **Primary — Kitco:** the exact URLs above
   Extract: bid price per ounce (USD), day's change ($), low, high, and the page date/time stamp (New York time).
 - **Kitco is the only source** (user's decision, 16 Nov 2026). No second-source check.
 - Do NOT use investing.com (it has shown undated, stale prices).
 
 Accept the price only if Kitco's stamp is today and no more than 5 minutes old (07:55 Bahrain = 04:55 UTC = 23:55 New York the previous day in winter / 00:55 in summer — compare carefully in UTC), and bid, change, low and high are all present and consistent (low ≤ bid ≤ high).
-If a check fails, wait 60 seconds and re-fetch (new epoch), up to 3 tries. Still failing → no post, notify the user.
+If a check fails, wait 60 seconds and re-fetch with the next URL from the list, up to 3 tries. Still failing → no post, notify the user.
 
 **Saturday:** the market is closed. Kitco shows Friday's close (stamp ≈ Friday 17:00 New York); the 5-minute rule does not apply, but the stamp must be that Friday close. Use Friday's day change. Render with `--closing` (the post says it's Friday's closing price and stays the same Saturday and Sunday).
 
