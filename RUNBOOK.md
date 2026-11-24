@@ -13,22 +13,23 @@ Golden rule: **never publish a price that isn't verified live.** If any check fa
 - `TZ=Asia/Bahrain date` — if earlier than 07:55, sleep until 07:55:00 (Bash with a long timeout).
 - If it's already later than 08:10, do NOT post. Notify the user that the run started too late.
 
-## 3. Get the live price (within 5 minutes of fetching)
-Use ONLY these exact URLs, written out in full (a URL that isn't written verbatim in the task prompt triggers a permission prompt that nobody answers in an unattended run — that's why runs on 18 Nov failed). Try 1 → `https://www.kitco.com/charts/gold?nocache=1`, try 2 → `https://www.kitco.com/charts/gold?nocache=2`, try 3 → `https://www.kitco.com/charts/gold?nocache=3`. Never build a URL with the epoch or any other value.
+## 3. Get the live price (via GitHub Actions — no web fetch by Claude)
+Claude does NOT open Kitco itself (WebFetch needs a human approval that nobody gives in an unattended run — that's why the 18 and 24 Nov runs failed). Instead the GitHub workflow `gold-price.yml` reads Kitco (`https://www.kitco.com/charts/gold?nocache=1..3`) and commits `prices/latest.json` (bid, change, low, high, Kitco stamp).
+**Kitco is the only source** (user's decision, 16 Nov 2026). Do NOT use investing.com or any other site.
 
-- **Primary — Kitco:** the exact URLs above
-  Extract: bid price per ounce (USD), day's change ($), low, high, and the page date/time stamp (New York time).
-- **Kitco is the only source** (user's decision, 16 Nov 2026). No second-source check.
-- Do NOT use investing.com (it has shown undated, stale prices).
-
-Accept the price only if Kitco's stamp is today and no more than 5 minutes old (07:55 Bahrain = 04:55 UTC = 23:55 New York the previous day in winter / 00:55 in summer — compare carefully in UTC), and bid, change, low and high are all present and consistent (low ≤ bid ≤ high).
-If a check fails, wait 60 seconds and re-fetch with the next URL from the list, up to 3 tries. Still failing → no post, notify the user.
-
-**Saturday:** the market is closed. Kitco shows Friday's close (stamp ≈ Friday 17:00 New York); the 5-minute rule does not apply, but the stamp must be that Friday close. Use Friday's day change. Render with `--closing` (the post says it's Friday's closing price and stays the same Saturday and Sunday).
+At 07:55 Bahrain, up to 3 tries, 60 s apart:
+1. `AFTER=$(date -u +%Y-%m-%dT%H:%M:%SZ)` then trigger the workflow with the GitHub MCP tool `actions_run_trigger` (method `run_workflow`, owner `acc66820-dot`, repo `gold-posts`, workflow_id `gold-price.yml`, ref `main`).
+2. Poll for up to ~2 min: `git pull -q --rebase origin main && python3 tools/check_price.py --after $AFTER` every 15 s until it prints `OK`.
+3. `check_price.py` enforces the rules and prints the exact `generate.py` command to use:
+   - Mon–Fri: Kitco stamp no more than 5 min old (compared in UTC), file fetched after the trigger, low ≤ bid ≤ high.
+   - Saturday: stamp must be Friday's close (NY Friday, ≥ 16:00); adds `--closing`. Use Friday's day change.
+   - Sunday: fails → no post.
+If all 3 tries fail (workflow error — check its log with `actions_list`/`get_job_logs` — or a FAIL from check_price.py) → no post, notify the user with the reason.
+(The workflow also runs on its own at ~07:50 Bahrain Mon–Sat as a backup; that file only counts if check_price.py accepts it.)
 
 ## 4. Render
 ```
-python3 generate.py --price <bid> --change <day change $> --low <low> --high <high> --date <YYYY-MM-DD Bahrain> --out posts/<YYYY-MM-DD>.png [--closing]
+<the command printed by tools/check_price.py>   # = generate.py --price <bid> --change <change> --low <low> --high <high> --date <YYYY-MM-DD> --out posts/<YYYY-MM-DD>.png [--closing]
 ```
 This writes the PNG and `posts/<date>.txt` (the caption). Open the PNG with Read and check it visually: numbers present, nothing overlapping, 21K is the hero. Sanity check (BHD/gram = USD/oz price × factor × 0.38): 24K ×0.0321, 22K ×0.0294, 21K ×0.028, 18K ×0.024.
 
