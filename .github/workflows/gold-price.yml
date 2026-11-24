@@ -1,0 +1,29 @@
+name: gold-price
+# Fetches the live Kitco gold quote into prices/latest.json.
+# Triggered by the daily Claude task at 07:55 Bahrain (workflow_dispatch),
+# with a scheduled backup run around 07:50 Bahrain (04:50 UTC) Mon-Sat.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "50 4 * * 1-6"
+permissions:
+  contents: write
+concurrency:
+  group: gold-price
+  cancel-in-progress: false
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch Kitco quote
+        run: python3 tools/fetch_kitco.py
+      - name: Commit prices/latest.json
+        run: |
+          git config user.name "gold-price-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add prices/latest.json
+          git commit -m "Kitco price $(python3 -c 'import json;d=json.load(open("prices/latest.json"));print(d["bid"], d["stamp_ny"])')" || exit 0
+          for i in 1 2 3; do git pull --rebase -q origin main && git push -q origin HEAD:main && exit 0; sleep 5; done
+          exit 1
