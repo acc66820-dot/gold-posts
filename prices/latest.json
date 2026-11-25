@@ -1,15 +1,15 @@
 {
   "source": "kitco",
   "url": "https://www.kitco.com/charts/gold?nocache=1",
-  "bid": 3618.3,
-  "ask": 3620.3,
-  "change": -15.9,
-  "change_pct": -0.4375,
-  "low": 3606.8,
+  "bid": 3549.1,
+  "ask": 3551.1,
+  "change": -6,
+  "change_pct": -0.1688,
+  "low": 3533.2,
   "high": 3679,
-  "stamp_unix": 1795512000,
-  "stamp_utc": "2026-11-24T09:20:00Z",
-  "stamp_ny": "2026-11-24 04:20 EST",
-  "fetched_utc": "2026-11-24T09:22:16Z",
-  "age_minutes_at_fetch": 2.3
+  "stamp_unix": 1795582380,
+  "stamp_utc": "2026-11-25T04:53:00Z",
+  "stamp_ny": "2026-11-24 23:53 EST",
+  "fetched_utc": "2026-11-25T04:55:13Z",
+  "age_minutes_at_fetch": 2.2
 }
